@@ -60,7 +60,7 @@
         <div class="wish">
           <h3 class="wish-hbd">Happy Valentine's Day Beautiful!</h3>
           <h5 id="wishText">You are amazing, Just the way you are!</h5>
-          <audio id="audio" controls muted autoplay>
+          <audio id="audio" preload="auto">
             <source src="./song/song.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
@@ -121,26 +121,76 @@
         </svg>
       </div>
       <div class="nine">
-        <p>Okay, now come back and tell me if you liked it.</p>
+      <p><script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var audio = document.getElementById("audio");
+
+        // Create an empty audio buffer to unlock autoplay
+        var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        var unlock = audioContext.createBuffer(1, 1, 22050);
+        var source = audioContext.createBufferSource();
+        source.buffer = unlock;
+        source.connect(audioContext.destination);
+        source.start(0);
+
+        console.log("Browser unlocked for autoplay.");
+
+        // Play the main audio muted so it's ready
+        audio.play().then(() => {
+            console.log("Main audio started muted.");
+
+            // Unmute the audio after 32 seconds
+            setTimeout(() => {
+                audio.muted = false;
+                audio.volume = 1.0;
+                console.log("Audio unmuted at 32 seconds.");
+            }, 32000);
+
+        }).catch((error) => {
+            console.error("Main audio autoplay blocked:", error);
+        });
+    });
+</script>Okay, now come back and tell me if you liked it.</p>
         <p id="replay">Or click, if you want to watch it again.</p>
         <p class="last-smile">:)</p>
         <p> </p>
       </div>
     </div>
     <script>
-   
-      function playAudioAfterDelay(delay) {
-          setTimeout(function() {
-              var audio = document.getElementById("audio");
-              audio.muted = false;
-              audio.play().catch(function(error) {
-                  console.error("Error playing audio:", error);
-              });
-          }, delay);
-      }
+      // Updated audio handling
+      document.addEventListener('DOMContentLoaded', function() {
+        const audio = document.getElementById('audio');
+        
+        // Function to handle audio playback
+        function playAudio() {
+          // Create user interaction promise
+          const userInteraction = new Promise((resolve) => {
+            document.addEventListener('click', resolve, { once: true });
+            document.addEventListener('touchstart', resolve, { once: true });
+          });
 
-      playAudioAfterDelay(32000); 
-  </script>
+          // Try to play after delay and user interaction
+          setTimeout(() => {
+            userInteraction.then(() => {
+              audio.play().catch((error) => {
+                console.log("Audio playback failed:", error);
+                // Fallback: Add a play button if autoplay fails
+                if (!document.getElementById('playButton')) {
+                  const playButton = document.createElement('button');
+                  playButton.id = 'playButton';
+                  playButton.innerHTML = '▶️ Play Music';
+                  playButton.style.cssText = 'position: fixed; bottom: 20px; right: 20px; padding: 10px; z-index: 1000;';
+                  playButton.onclick = () => audio.play();
+                  document.body.appendChild(playButton);
+                }
+              });
+            });
+          }, 32000);
+        }
+
+        playAudio();
+      });
+    </script>
     
   </body>
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
